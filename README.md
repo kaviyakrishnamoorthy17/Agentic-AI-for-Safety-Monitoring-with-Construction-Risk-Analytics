@@ -127,7 +127,6 @@ Agentic-AI-for-Safety-Monitoring-with-Construction-Risk-Analytics/
 ```
 
 ## Future Enhancements
-
 - Real-time edge deployment for site cameras
 - Integration with IoT safety sensors
 - Automated incident report generation
