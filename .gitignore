@@ -1,0 +1,8 @@
+venv/
+runs/
+*.db
+__pycache__/
+*.pyc
+.vscode/
+node_modules/
+frontend/dist/

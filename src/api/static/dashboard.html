@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Risk Monitor — BuildSure AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181C;
+    --panel:#1D2329;
+    --panel-2:#20272E;
+    --line:#2A3138;
+    --text:#E8EBED;
+    --muted:#8A939C;
+    --amber:#E8A33D;
+    --red:#D64545;
+    --green:#4F9D6E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 24px 60px;
+  }
+  .wrap{max-width:1040px;margin:0 auto;}
+
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:18px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .title-block h1{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;
+    font-size:30px;
+    letter-spacing:0.3px;
+    margin:0;
+  }
+  .title-block p{
+    margin:4px 0 0;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 0 rgba(79,157,110,0.6);
+    animation:pulse 2s infinite;
+  }
+  .dot.stale{background:var(--muted);animation:none;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(79,157,110,0.5);}
+    70%{box-shadow:0 0 0 7px rgba(79,157,110,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,157,110,0);}
+  }
+
+  .kpi-row{
+    display:grid;
+    grid-template-columns:1.3fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .kpi{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+  }
+  .kpi .label{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:var(--muted);
+    letter-spacing:0.4px;
+    margin-bottom:8px;
+  }
+  .kpi .value{
+    font-size:34px;
+    font-weight:700;
+    line-height:1;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .kpi .value .unit{font-size:15px;color:var(--muted);font-weight:500;}
+  .level-pill{
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:4px;
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600;
+    font-size:20px;
+    letter-spacing:0.5px;
+  }
+  .level-Low{background:rgba(79,157,110,0.16);color:var(--green);}
+  .level-Medium{background:rgba(232,163,61,0.16);color:var(--amber);}
+  .level-High{background:rgba(214,69,69,0.16);color:var(--red);}
+  .level-Critical{background:var(--red);color:#fff;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .panel h2{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.3px;
+    margin:0 0 16px;
+    color:var(--text);
+  }
+
+  .bar-row{margin-bottom:14px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    margin-bottom:6px;
+    color:var(--muted);
+  }
+  .bar-label span:first-child{color:var(--text);font-weight:500;}
+  .bar-track{
+    height:8px;
+    background:var(--panel-2);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:4px;
+    transition:width 0.4s ease;
+  }
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{
+    text-align:left;
+    color:var(--muted);
+    font-weight:500;
+    font-size:12px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:10px 6px;
+    border-bottom:1px solid var(--line);
+    color:var(--text);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  .sev-tag{
+    padding:3px 9px;
+    border-radius:3px;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  .sev-High{background:rgba(214,69,69,0.16);color:var(--red);}
+  .sev-Medium{background:rgba(232,163,61,0.16);color:var(--amber);}
+  .sev-Low{background:rgba(79,157,110,0.16);color:var(--green);}
+  .time-cell{color:var(--muted);white-space:nowrap;}
+
+  .empty{
+    color:var(--muted);
+    font-size:13.5px;
+    padding:8px 0;
+  }
+  .error-banner{
+    background:rgba(214,69,69,0.12);
+    border:1px solid rgba(214,69,69,0.4);
+    color:#f0a3a3;
+    padding:12px 16px;
+    border-radius:6px;
+    font-size:13px;
+    margin-bottom:14px;
+    display:none;
+  }
+
+  @media (max-width:680px){
+    .kpi-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <h1>Site Risk Monitor</h1>
+      <p>Project #1 — live hazard tracking, 10-minute window</p>
+    </div>
+    <div class="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Connecting…</span>
+    </div>
+  </header>
+
+  <div class="error-banner" id="errorBanner">
+    Can't reach the API. Confirm the Flask server is running at this address, then this will reconnect automatically.
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="label">RISK LEVEL</div>
+      <div class="value"><span class="level-pill level-Low" id="levelPill">—</span></div>
+    </div>
+    <div class="kpi">
+      <div class="label">RISK SCORE</div>
+      <div class="value" id="scoreValue">—<span class="unit">/ 20+</span></div>
+    </div>
+    <div class="kpi">
+      <div class="label">HAZARDS (LAST 10 MIN)</div>
+      <div class="value" id="hazardCount">—</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Risk by type — last 10 minutes</h2>
+    <div id="typeBreakdown">
+      <div class="empty">No data yet.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Recent hazard log</h2>
+    <table>
+      <thead>
+        <tr><th>Time</th><th>Type</th><th>Severity</th></tr>
+      </thead>
+      <tbody id="hazardLog">
+        <tr><td colspan="3" class="empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = ''; // same-origin: served from the Flask app itself
+  const REFRESH_MS = 5000;
+
+  function fmtTime(iso){
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+
+  function setStatus(ok){
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    const banner = document.getElementById('errorBanner');
+    if(ok){
+      dot.classList.remove('stale');
+      text.textContent = 'Live — updated ' + new Date().toLocaleTimeString();
+      banner.style.display = 'none';
+    } else {
+      dot.classList.add('stale');
+      text.textContent = 'Connection lost';
+      banner.style.display = 'block';
+    }
+  }
+
+  function renderScore(data){
+    document.getElementById('scoreValue').innerHTML = data.score + '<span class="unit">/ 20+</span>';
+    document.getElementById('hazardCount').textContent = data.hazard_count;
+    const pill = document.getElementById('levelPill');
+    pill.textContent = data.level;
+    pill.className = 'level-pill level-' + data.level;
+  }
+
+  function renderBreakdown(hazards){
+    const container = document.getElementById('typeBreakdown');
+    if(!hazards.length){
+      container.innerHTML = '<div class="empty">No hazards in the current window.</div>';
+      return;
+    }
+    const counts = {};
+    hazards.forEach(h => { counts[h.risk_type] = (counts[h.risk_type]||0) + 1; });
+    const total = hazards.length;
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const colors = ['var(--red)','var(--amber)','var(--green)','#6E85B7'];
+    container.innerHTML = sorted.map(([type,count],i) => {
+      const pct = Math.round((count/total)*100);
+      return `
+        <div class="bar-row">
+          <div class="bar-label"><span>${type}</span><span>${count} · ${pct}%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderLog(hazards){
+    const tbody = document.getElementById('hazardLog');
+    if(!hazards.length){
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No hazards recorded yet.</td></tr>';
+      return;
+    }
+    const recent = [...hazards].sort((a,b)=> new Date(b.detected_at) - new Date(a.detected_at)).slice(0,15);
+    tbody.innerHTML = recent.map(h => `
+      <tr>
+        <td class="time-cell">${fmtTime(h.detected_at)}</td>
+        <td>${h.risk_type}</td>
+        <td><span class="sev-tag sev-${h.severity}">${h.severity}</span></td>
+      </tr>`).join('');
+  }
+
+  async function refresh(){
+    try{
+      const [scoreRes, hazardsRes] = await Promise.all([
+        fetch(API_BASE + '/api/risk-score'),
+        fetch(API_BASE + '/api/hazards')
+      ]);
+      if(!scoreRes.ok || !hazardsRes.ok) throw new Error('bad response');
+      const score = await scoreRes.json();
+      const hazards = await hazardsRes.json();
+
+      renderScore(score);
+      renderBreakdown(hazards);
+      renderLog(hazards);
+      setStatus(true);
+    } catch(err){
+      setStatus(false);
+    }
+  }
+
+  refresh();
+  setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
